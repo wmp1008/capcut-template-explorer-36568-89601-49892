@@ -1,0 +1,234 @@
+═══════════════════════════════════════════════════════════════
+           ADMOB INTEGRATION GUIDE FOR CCAPP
+═══════════════════════════════════════════════════════════════
+
+📱 YOUR ADMOB APP ID: ca-app-pub-5928764198320247~5845974226
+
+This guide will help you set up AdMob ads in your Android and iOS app.
+Currently using TEST AD UNITS - safe for testing and won't affect your AdMob account.
+
+═══════════════════════════════════════════════════════════════
+STEP 1: EXPORT PROJECT TO GITHUB
+═══════════════════════════════════════════════════════════════
+
+1. Click the "Export to Github" button in Lovable
+2. Connect your GitHub account if not already connected
+3. The project will be pushed to your GitHub repository
+
+═══════════════════════════════════════════════════════════════
+STEP 2: CLONE PROJECT TO YOUR COMPUTER
+═══════════════════════════════════════════════════════════════
+
+1. Open Terminal (Mac) or Command Prompt (Windows)
+2. Run: git clone [your-github-repo-url]
+3. Navigate to project: cd [project-folder-name]
+4. Install dependencies: npm install
+
+═══════════════════════════════════════════════════════════════
+STEP 3: ADD ANDROID PLATFORM
+═══════════════════════════════════════════════════════════════
+
+1. In Terminal/Command Prompt, run:
+   npx cap add android
+
+2. Open android/app/src/main/AndroidManifest.xml
+
+3. Add the following INSIDE the <application> tag (before </application>):
+
+   <meta-data
+       android:name="com.google.android.gms.ads.APPLICATION_ID"
+       android:value="ca-app-pub-5928764198320247~5845974226"/>
+
+4. Save the file
+
+═══════════════════════════════════════════════════════════════
+STEP 4: ADD IOS PLATFORM
+═══════════════════════════════════════════════════════════════
+
+⚠️ NOTE: iOS setup requires a Mac with Xcode installed
+
+1. In Terminal, run:
+   npx cap add ios
+
+2. Open ios/App/App/Info.plist
+
+3. Add the following before the last </dict> tag:
+
+   <key>GADApplicationIdentifier</key>
+   <string>ca-app-pub-5928764198320247~5845974226</string>
+   <key>SKAdNetworkItems</key>
+   <array>
+     <dict>
+       <key>SKAdNetworkIdentifierKey</key>
+       <string>cstr6suwn9.skadnetwork</string>
+     </dict>
+   </array>
+
+4. Save the file
+
+═══════════════════════════════════════════════════════════════
+STEP 5: SYNC AND BUILD
+═══════════════════════════════════════════════════════════════
+
+1. Build the web app:
+   npm run build
+
+2. Sync to native platforms:
+   npx cap sync
+
+═══════════════════════════════════════════════════════════════
+STEP 6: TEST ON ANDROID
+═══════════════════════════════════════════════════════════════
+
+1. Make sure Android Studio is installed
+2. Connect an Android device or start an emulator
+3. Run: npx cap run android
+4. The app will open and you'll see test ads
+
+═══════════════════════════════════════════════════════════════
+STEP 7: TEST ON IOS
+═══════════════════════════════════════════════════════════════
+
+1. Make sure Xcode is installed (Mac only)
+2. Connect an iOS device or start a simulator
+3. Run: npx cap run ios
+4. The app will open and you'll see test ads
+
+═══════════════════════════════════════════════════════════════
+STEP 8: REPLACE TEST ADS WITH REAL ADS
+═══════════════════════════════════════════════════════════════
+
+⚠️ IMPORTANT: Only do this when ready to publish!
+
+1. Go to AdMob dashboard: https://admob.google.com
+2. Create real ad units for your app:
+   - Banner ad unit
+   - Interstitial ad unit
+   - Rewarded Interstitial ad unit
+
+3. Copy the real ad unit IDs
+
+4. Open src/services/admob.ts in your code editor
+
+5. Replace the TEST ad unit IDs with your REAL ad unit IDs:
+
+   const AD_UNITS = {
+     banner: 'YOUR-REAL-BANNER-ID',
+     interstitial: 'YOUR-REAL-INTERSTITIAL-ID',
+     rewardedInterstitial: 'YOUR-REAL-REWARDED-INTERSTITIAL-ID',
+   };
+
+6. Change initializeForTesting to false:
+
+   await AdMob.initialize({
+     requestTrackingAuthorization: true,
+     testingDevices: [],
+     initializeForTesting: false, // Changed from true to false
+   });
+
+7. Run: npm run build
+8. Run: npx cap sync
+9. Test again on devices
+
+═══════════════════════════════════════════════════════════════
+STEP 9: PUBLISH TO GOOGLE PLAY STORE
+═══════════════════════════════════════════════════════════════
+
+Prerequisites:
+- Google Play Developer account ($25 one-time fee)
+- App signing key
+
+1. In Android Studio, select Build > Generate Signed Bundle/APK
+2. Follow the wizard to create a release build
+3. Go to Google Play Console: https://play.google.com/console
+4. Click "Create app"
+5. Fill in app details
+6. Upload your AAB file
+7. Complete all required sections (content rating, privacy policy, etc.)
+8. Submit for review
+
+Detailed guide: https://developer.android.com/studio/publish
+
+═══════════════════════════════════════════════════════════════
+STEP 10: PUBLISH TO APPLE APP STORE
+═══════════════════════════════════════════════════════════════
+
+Prerequisites:
+- Apple Developer account ($99/year)
+- Mac with Xcode
+
+1. Open ios/App/App.xcworkspace in Xcode
+2. Select Product > Archive
+3. Once archived, click "Distribute App"
+4. Choose "App Store Connect"
+5. Go to App Store Connect: https://appstoreconnect.apple.com
+6. Create a new app
+7. Fill in app metadata (screenshots, description, etc.)
+8. Upload your build
+9. Submit for review
+
+Detailed guide: https://developer.apple.com/ios/submit/
+
+═══════════════════════════════════════════════════════════════
+WHERE ADS ARE SHOWN IN YOUR APP
+═══════════════════════════════════════════════════════════════
+
+📍 Banner Ad:
+   - Shows at the bottom of the Home page
+   - Automatically displays when app opens
+
+📍 Interstitial Ad:
+   - Shows when opening a template detail page
+   - Full-screen ad that users can close
+
+📍 Rewarded Interstitial Ad:
+   - Can be triggered for special actions
+   - Currently ready but not actively used
+
+═══════════════════════════════════════════════════════════════
+TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════
+
+❌ "AdMob not initialized"
+   → Make sure you followed Step 3 (Android) or Step 4 (iOS)
+   → Check that the App ID is correctly added to manifest files
+
+❌ Ads not showing
+   → Test ads should always work
+   → Real ads may take time to serve
+   → Check AdMob dashboard for any account issues
+
+❌ Build errors
+   → Run: npm install
+   → Run: npx cap sync
+   → Clean and rebuild the project
+
+❌ "Command not found: npx"
+   → Install Node.js from https://nodejs.org
+
+═══════════════════════════════════════════════════════════════
+IMPORTANT REMINDERS
+═══════════════════════════════════════════════════════════════
+
+✅ ALWAYS test with TEST AD UNITS first
+✅ NEVER click your own ads (can get account banned)
+✅ Replace test ads with real ads before publishing
+✅ Follow AdMob policies: https://support.google.com/admob/answer/6128543
+✅ Include privacy policy in your app stores
+✅ After EVERY code change, run: npm run build → npx cap sync
+
+═══════════════════════════════════════════════════════════════
+USEFUL LINKS
+═══════════════════════════════════════════════════════════════
+
+📚 Capacitor AdMob Docs: https://github.com/capacitor-community/admob
+📚 AdMob Help: https://support.google.com/admob
+📚 Capacitor Docs: https://capacitorjs.com/docs
+📚 Android Publishing: https://developer.android.com/studio/publish
+📚 iOS Publishing: https://developer.apple.com/ios/submit/
+
+═══════════════════════════════════════════════════════════════
+
+Need help? Check the Capacitor AdMob GitHub issues or Lovable documentation.
+
+Good luck with your app! 🚀
