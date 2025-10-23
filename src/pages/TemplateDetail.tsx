@@ -27,6 +27,16 @@ const TemplateDetail = () => {
     }
   }, [id]);
 
+  useEffect(() => {
+    // Show banner ad at bottom of template detail screen
+    adMobService.showBanner().catch(console.error);
+    
+    // Clean up banner when component unmounts
+    return () => {
+      adMobService.hideBanner().catch(console.error);
+    };
+  }, []);
+
   const findTemplate = async (webId: string) => {
     setLoading(true);
     try {
@@ -232,15 +242,6 @@ const TemplateDetail = () => {
                 </Button>
               </a>
             </div>
-          </div>
-        </div>
-
-        {/* Bottom Banner Ad */}
-        <div className="mt-12 pt-8 border-t">
-          <div className="bg-muted/30 rounded-xl p-8 text-center border-2 border-dashed border-muted-foreground/20">
-            <p className="text-sm text-muted-foreground font-medium mb-2">Advertisement</p>
-            <p className="text-xs text-muted-foreground/60">Banner Ad Space - Bottom of Template Details</p>
-            <div className="mt-4 h-24 bg-muted/50 rounded-lg animate-pulse"></div>
           </div>
         </div>
       </main>
