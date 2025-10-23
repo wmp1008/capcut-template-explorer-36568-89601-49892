@@ -6,6 +6,8 @@ import { TemplateCard } from "@/components/TemplateCard";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { adMobService } from "@/services/admob";
+import { InlineBannerAd } from "@/components/InlineBannerAd";
 
 const Search = () => {
   const [searchParams] = useSearchParams();
@@ -24,6 +26,10 @@ const Search = () => {
 
   const searchTemplates = async (searchTerm: string) => {
     setLoading(true);
+    
+    // Show interstitial ad while search runs in background
+    adMobService.showInterstitial().catch(console.error);
+    
     try {
       const response = await ApiService.searchTemplates(searchTerm);
       setTemplates(response.data?.video_templates || []);
@@ -100,9 +106,19 @@ const Search = () => {
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {templates.map((template) => (
-                <TemplateCard key={template.web_id} template={template} searchQuery={query} />
-              ))}
+              {templates.map((template, index) => {
+                // Show inline banner ad randomly after every 3-4 templates
+                const shouldShowAd = (index + 1) % (Math.random() > 0.5 ? 3 : 4) === 0 && index !== templates.length - 1;
+                
+                return (
+                  <>
+                    <TemplateCard key={template.web_id} template={template} searchQuery={query} />
+                    {shouldShowAd && (
+                      <InlineBannerAd key={`ad-${index}`} adId={`inline-banner-search-${index}`} />
+                    )}
+                  </>
+                );
+              })}
             </div>
           </>
         )}

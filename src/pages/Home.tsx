@@ -8,6 +8,7 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { adMobService } from "@/services/admob";
+import { InlineBannerAd } from "@/components/InlineBannerAd";
 
 const Home = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -123,13 +124,23 @@ const Home = () => {
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {templates.map((template) => (
-                <TemplateCard 
-                  key={template.web_id} 
-                  template={template} 
-                  currentCategory={selectedCategory}
-                />
-              ))}
+              {templates.map((template, index) => {
+                // Show inline banner ad randomly after every 3-4 templates
+                const shouldShowAd = (index + 1) % (Math.random() > 0.5 ? 3 : 4) === 0 && index !== templates.length - 1;
+                
+                return (
+                  <>
+                    <TemplateCard 
+                      key={template.web_id} 
+                      template={template} 
+                      currentCategory={selectedCategory}
+                    />
+                    {shouldShowAd && (
+                      <InlineBannerAd key={`ad-${index}`} adId={`inline-banner-${index}`} />
+                    )}
+                  </>
+                );
+              })}
             </div>
           </>
         )}
