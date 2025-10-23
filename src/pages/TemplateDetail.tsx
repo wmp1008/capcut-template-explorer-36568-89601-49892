@@ -27,16 +27,6 @@ const TemplateDetail = () => {
     }
   }, [id]);
 
-  useEffect(() => {
-    // Show banner ad at bottom of template detail screen
-    adMobService.showBanner().catch(console.error);
-    
-    // Clean up banner when component unmounts
-    return () => {
-      adMobService.hideBanner().catch(console.error);
-    };
-  }, []);
-
   const findTemplate = async (webId: string) => {
     setLoading(true);
     try {
