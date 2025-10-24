@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Users, FileText, ExternalLink, Smartphone, Play } from "lucide-react";
+import { ArrowLeft, Users, FileText, ExternalLink, Smartphone } from "lucide-react";
 import { ApiService, VideoTemplate, categories } from "@/services/api";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { adMobService } from "@/services/admob";
-import { toast } from "sonner";
+
 
 const TemplateDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -14,16 +14,12 @@ const TemplateDetail = () => {
   const [searchParams] = useSearchParams();
   const [template, setTemplate] = useState<VideoTemplate | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isButtonUnlocked, setIsButtonUnlocked] = useState(false);
   
   const fromPath = searchParams.get('from') || '/';
 
   useEffect(() => {
     if (id) {
       findTemplate(id);
-      
-      // Show interstitial ad when template detail page opens
-      adMobService.showInterstitial().catch(console.error);
     }
   }, [id]);
 
@@ -73,20 +69,12 @@ const TemplateDetail = () => {
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   };
 
-  const handleWatchAdToUnlock = async () => {
+  const handleUseTemplate = async () => {
     try {
-      toast.info('Loading ad...', { duration: 2000 });
-      const result = await adMobService.showRewardedInterstitial();
-      
-      if (result) {
-        setIsButtonUnlocked(true);
-        toast.success('Button unlocked! You can now use the template.', { duration: 3000 });
-      } else {
-        toast.error('Ad failed to load. Please try again.', { duration: 3000 });
-      }
+      // Show interstitial ad when user clicks to use template
+      await adMobService.showInterstitial();
     } catch (error) {
-      console.error('Error showing rewarded ad:', error);
-      toast.error('Could not load ad. Please try again.', { duration: 3000 });
+      console.error('Error showing ad:', error);
     }
   };
 
@@ -191,31 +179,21 @@ const TemplateDetail = () => {
 
             {/* Action Buttons */}
             <div className="space-y-3">
-              {!isButtonUnlocked ? (
+              <a
+                href={capcutAppUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full"
+                onClick={handleUseTemplate}
+              >
                 <Button
                   size="lg"
-                  onClick={handleWatchAdToUnlock}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all"
+                  className="w-full bg-gradient-primary hover:opacity-90 transition-opacity"
                 >
-                  <Play className="w-5 h-5 mr-2" />
-                  Watch Ad to Unlock Template
+                  <Smartphone className="w-5 h-5 mr-2" />
+                  Use Template in CapCut App
                 </Button>
-              ) : (
-                <a
-                  href={capcutAppUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full"
-                >
-                  <Button
-                    size="lg"
-                    className="w-full bg-gradient-primary hover:opacity-90 transition-opacity"
-                  >
-                    <Smartphone className="w-5 h-5 mr-2" />
-                    Use Template in CapCut App
-                  </Button>
-                </a>
-              )}
+              </a>
               <a
                 href={capcutWebUrl}
                 target="_blank"

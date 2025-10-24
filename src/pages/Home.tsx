@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
 import { ApiService, categories, VideoTemplate } from "@/services/api";
+import { adMobService } from "@/services/admob";
 import { TemplateCard } from "@/components/TemplateCard";
 import { CategoryChip } from "@/components/CategoryChip";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
@@ -41,10 +42,21 @@ const Home = () => {
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      // Show rewarded ad before allowing search
+      try {
+        const result = await adMobService.showRewardedInterstitial();
+        if (result) {
+          // Only navigate to search if ad was watched
+          navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        }
+      } catch (error) {
+        console.error('Error showing rewarded ad:', error);
+        // Still allow search if ad fails
+        navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      }
     }
   };
 

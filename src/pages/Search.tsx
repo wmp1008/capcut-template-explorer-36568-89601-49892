@@ -26,9 +26,6 @@ const Search = () => {
   const searchTemplates = async (searchTerm: string) => {
     setLoading(true);
     
-    // Show interstitial ad while search runs in background
-    adMobService.showInterstitial().catch(console.error);
-    
     try {
       const response = await ApiService.searchTemplates(searchTerm);
       setTemplates(response.data?.video_templates || []);
@@ -40,10 +37,21 @@ const Search = () => {
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      // Show rewarded ad before allowing search
+      try {
+        const result = await adMobService.showRewardedInterstitial();
+        if (result) {
+          // Only navigate to search if ad was watched
+          navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        }
+      } catch (error) {
+        console.error('Error showing rewarded ad:', error);
+        // Still allow search if ad fails
+        navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      }
     }
   };
 
