@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Search as SearchIcon } from "lucide-react";
+import { ArrowLeft, Search as SearchIcon, Play } from "lucide-react";
 import { ApiService, VideoTemplate } from "@/services/api";
 import { TemplateCard } from "@/components/TemplateCard";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
@@ -82,8 +82,9 @@ const Search = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1 h-12 bg-white/10 border-white/20 text-white placeholder:text-white/60"
               />
-              <Button type="submit" size="lg" variant="secondary" className="h-12">
+              <Button type="submit" size="lg" variant="secondary" className="h-12 relative">
                 <SearchIcon className="w-5 h-5" />
+                <Play className="w-3 h-3 absolute -top-1 -right-1 fill-current" />
               </Button>
             </div>
           </form>

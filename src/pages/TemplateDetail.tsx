@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Users, FileText, ExternalLink, Smartphone } from "lucide-react";
+import { ArrowLeft, Users, FileText, ExternalLink, Smartphone, Play } from "lucide-react";
 import { ApiService, VideoTemplate, categories } from "@/services/api";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ const TemplateDetail = () => {
   const [searchParams] = useSearchParams();
   const [template, setTemplate] = useState<VideoTemplate | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isButtonUnlocked, setIsButtonUnlocked] = useState(false);
   
   const fromPath = searchParams.get('from') || '/';
 
@@ -69,9 +70,24 @@ const TemplateDetail = () => {
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   };
 
-  const handleUseTemplate = async () => {
+  const handleUnlockButton = async () => {
     try {
-      // Show interstitial ad when user clicks to use template
+      const result = await adMobService.showRewardedInterstitial();
+      if (result) {
+        setIsButtonUnlocked(true);
+      }
+    } catch (error) {
+      console.error('Error showing rewarded ad:', error);
+    }
+  };
+
+  const handleUseTemplate = async () => {
+    if (!isButtonUnlocked) {
+      await handleUnlockButton();
+      return;
+    }
+    
+    try {
       await adMobService.showInterstitial();
     } catch (error) {
       console.error('Error showing ad:', error);
@@ -179,21 +195,32 @@ const TemplateDetail = () => {
 
             {/* Action Buttons */}
             <div className="space-y-3">
-              <a
-                href={capcutAppUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full"
-                onClick={handleUseTemplate}
-              >
+              {!isButtonUnlocked ? (
                 <Button
                   size="lg"
+                  onClick={handleUnlockButton}
                   className="w-full bg-gradient-primary hover:opacity-90 transition-opacity"
                 >
-                  <Smartphone className="w-5 h-5 mr-2" />
-                  Use Template in CapCut App
+                  <Play className="w-5 h-5 mr-2" />
+                  Watch an Ad to Unlock the Button
                 </Button>
-              </a>
+              ) : (
+                <a
+                  href={capcutAppUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full"
+                  onClick={handleUseTemplate}
+                >
+                  <Button
+                    size="lg"
+                    className="w-full bg-gradient-primary hover:opacity-90 transition-opacity"
+                  >
+                    <Smartphone className="w-5 h-5 mr-2" />
+                    Use Template in CapCut App
+                  </Button>
+                </a>
+              )}
               <a
                 href={capcutWebUrl}
                 target="_blank"
