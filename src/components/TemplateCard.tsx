@@ -7,13 +7,14 @@ interface TemplateCardProps {
   template: VideoTemplate;
   currentCategory?: number;
   searchQuery?: string;
+  allTemplates?: VideoTemplate[];
 }
 
 const formatUsage = (amount: number) => {
   return amount >= 1000 ? `${(amount / 1000).toFixed(1)}K` : amount;
 };
 
-export const TemplateCard = ({ template, currentCategory, searchQuery }: TemplateCardProps) => {
+export const TemplateCard = ({ template, currentCategory, searchQuery, allTemplates }: TemplateCardProps) => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -76,7 +77,7 @@ export const TemplateCard = ({ template, currentCategory, searchQuery }: Templat
   return (
     <Link 
       to={templateLink}
-      state={{ template }}
+      state={allTemplates ? { template, allTemplates } : { template }}
       className="group block"
     >
       <div 

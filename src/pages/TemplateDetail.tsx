@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Users, FileText, ExternalLink, Smartphone, Play } from "lucide-react";
+import { useParams, useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import { ArrowLeft, Users, FileText, ExternalLink, Smartphone, Play, MessageSquare } from "lucide-react";
 import { ApiService, VideoTemplate, categories } from "@/services/api";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { TemplateCard } from "@/components/TemplateCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { adMobService } from "@/services/admob";
@@ -11,18 +12,34 @@ import { adMobService } from "@/services/admob";
 const TemplateDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [template, setTemplate] = useState<VideoTemplate | null>(null);
   const [loading, setLoading] = useState(true);
   const [isButtonUnlocked, setIsButtonUnlocked] = useState(false);
+  const [relatedTemplates, setRelatedTemplates] = useState<VideoTemplate[]>([]);
+  const [displayedRelatedCount, setDisplayedRelatedCount] = useState(10);
   
   const fromPath = searchParams.get('from') || '/';
+  const RELATED_PER_PAGE = 10;
 
   useEffect(() => {
     if (id) {
       findTemplate(id);
     }
   }, [id]);
+
+  useEffect(() => {
+    // Get allTemplates from location state if available
+    const allTemplates = (location.state as { allTemplates?: VideoTemplate[] })?.allTemplates || [];
+    if (allTemplates.length > 0 && template) {
+      // Filter out current template and shuffle
+      const filtered = allTemplates.filter(t => t.web_id !== template.web_id);
+      const shuffled = filtered.sort(() => Math.random() - 0.5);
+      setRelatedTemplates(shuffled);
+      setDisplayedRelatedCount(RELATED_PER_PAGE);
+    }
+  }, [template, location.state]);
 
   const findTemplate = async (webId: string) => {
     setLoading(true);
@@ -93,6 +110,17 @@ const TemplateDetail = () => {
       console.error('Error showing ad:', error);
     }
   };
+
+  const handleLoadMoreRelated = async () => {
+    try {
+      await adMobService.showInterstitial();
+    } catch (error) {
+      console.error('Error showing ad:', error);
+    }
+    setDisplayedRelatedCount(prev => Math.min(prev + RELATED_PER_PAGE, relatedTemplates.length));
+  };
+
+  const visibleRelatedTemplates = relatedTemplates.slice(0, displayedRelatedCount);
 
   if (loading) {
     return (
@@ -184,6 +212,13 @@ const TemplateDetail = () => {
                   <p className="font-semibold text-lg">{template.fragment_count}</p>
                 </div>
               </div>
+              <div className="flex items-center gap-3 p-4 bg-card rounded-lg">
+                <MessageSquare className="w-5 h-5 text-primary" />
+                <div>
+                  <p className="text-sm text-muted-foreground">Text Segments</p>
+                  <p className="font-semibold text-lg">{template.draft_seg_info?.text_seg_len || 0}</p>
+                </div>
+              </div>
             </div>
 
             {/* Details */}
@@ -239,6 +274,35 @@ const TemplateDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* You May Also Like Section */}
+        {relatedTemplates.length > 0 && (
+          <div className="container mx-auto max-w-6xl px-4 mt-12">
+            <h2 className="text-2xl font-bold mb-6">You May Also Like</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {visibleRelatedTemplates.map((relatedTemplate) => (
+                <TemplateCard
+                  key={relatedTemplate.web_id}
+                  template={relatedTemplate}
+                  allTemplates={relatedTemplates}
+                />
+              ))}
+            </div>
+
+            {/* Load More Button */}
+            {displayedRelatedCount < relatedTemplates.length && (
+              <div className="text-center mt-8">
+                <Button
+                  onClick={handleLoadMoreRelated}
+                  size="lg"
+                  className="bg-gradient-primary hover:opacity-90 transition-opacity"
+                >
+                  Load More Templates...
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
       </main>
     </div>
   );

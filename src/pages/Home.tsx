@@ -11,12 +11,15 @@ import { Button } from "@/components/ui/button";
 
 const Home = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [templates, setTemplates] = useState<VideoTemplate[]>([]);
+  const [allTemplates, setAllTemplates] = useState<VideoTemplate[]>([]);
+  const [displayedCount, setDisplayedCount] = useState(20);
   const [loading, setLoading] = useState(true);
   const categoryFromUrl = parseInt(searchParams.get('category') || '6001');
   const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
+
+  const TEMPLATES_PER_PAGE = 20;
 
   useEffect(() => {
     const categoryParam = parseInt(searchParams.get('category') || '6001');
@@ -31,16 +34,28 @@ const Home = () => {
 
   const loadTemplates = async (categoryId: number) => {
     setLoading(true);
+    setDisplayedCount(TEMPLATES_PER_PAGE);
     try {
       const response = await ApiService.getCollectionTemplates(categoryId, 200);
-      setTemplates(response.data?.video_templates || []);
+      setAllTemplates(response.data?.video_templates || []);
     } catch (error) {
       console.error('Error loading templates:', error);
-      setTemplates([]);
+      setAllTemplates([]);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleLoadMore = async () => {
+    try {
+      await adMobService.showInterstitial();
+    } catch (error) {
+      console.error('Error showing ad:', error);
+    }
+    setDisplayedCount(prev => Math.min(prev + TEMPLATES_PER_PAGE, allTemplates.length));
+  };
+
+  const templates = allTemplates.slice(0, displayedCount);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -135,6 +150,19 @@ const Home = () => {
                 />
               ))}
             </div>
+
+            {/* Load More Button */}
+            {displayedCount < allTemplates.length && (
+              <div className="text-center mt-8">
+                <Button
+                  onClick={handleLoadMore}
+                  size="lg"
+                  className="bg-gradient-primary hover:opacity-90 transition-opacity"
+                >
+                  Load More Templates...
+                </Button>
+              </div>
+            )}
           </>
         )}
       </main>

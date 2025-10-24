@@ -16,6 +16,11 @@ export interface VideoDynamicCover {
   height: number;
 }
 
+export interface DraftSegInfo {
+  text_seg_len: number;
+  video_seg_len: number;
+}
+
 export interface VideoTemplate {
   id: number;
   web_id: string;
@@ -35,6 +40,7 @@ export interface VideoTemplate {
   favorite_count: number;
   video_dynamic_cover?: VideoDynamicCover;
   create_time: number;
+  draft_seg_info?: DraftSegInfo;
 }
 
 export interface ApiResponse {
