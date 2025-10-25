@@ -24,6 +24,9 @@ const TemplateDetail = () => {
   const RELATED_PER_PAGE = 10;
 
   useEffect(() => {
+    // Scroll to top when template changes
+    window.scrollTo(0, 0);
+    
     if (id) {
       findTemplate(id);
     }

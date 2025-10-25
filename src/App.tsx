@@ -69,11 +69,11 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <Sonner />
+        <Sonner position="top-right" />
         <BrowserRouter>
           <BackButtonHandler />
-          {/* Add padding-bottom to prevent content from being hidden by banner ad */}
-          <div className="pb-16">
+          {/* Add padding-bottom to prevent content from being hidden by banner ad and safe area */}
+          <div className="pb-28" style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/search" element={<Search />} />

@@ -19,6 +19,9 @@ export const TemplateCard = ({ template, currentCategory, searchQuery, allTempla
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isTouchDevice = 'ontouchstart' in window;
+  
+  // Get the current location to pass the "from" path to related templates
+  const currentPath = window.location.pathname + window.location.search;
 
   const aspectRatio = template.cover_height / template.cover_width;
   const paddingBottom = aspectRatio > 0 ? `${aspectRatio * 100}%` : '177.78%';
@@ -68,7 +71,18 @@ export const TemplateCard = ({ template, currentCategory, searchQuery, allTempla
 
   // Construct the template link with the current context (category or search) as a 'from' parameter
   let templateLink = `/template/${template.web_id}`;
-  if (searchQuery) {
+  
+  // Check if we're on a template detail page (indicating this is from "You May Also Like")
+  const isFromTemplateDetail = currentPath.startsWith('/template/');
+  
+  if (isFromTemplateDetail) {
+    // Preserve the original "from" parameter from the current URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const originalFrom = urlParams.get('from');
+    if (originalFrom) {
+      templateLink += `?from=${encodeURIComponent(originalFrom)}`;
+    }
+  } else if (searchQuery) {
     templateLink += `?from=${encodeURIComponent(`/search?q=${searchQuery}`)}`;
   } else if (currentCategory) {
     templateLink += `?from=${encodeURIComponent(`/?category=${currentCategory}`)}`;
