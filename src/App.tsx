@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { App as CapApp } from '@capacitor/app';
-import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin';
 import { adMobService } from "@/services/admob";
 import Home from "./pages/Home";
 import Search from "./pages/Search";
@@ -57,23 +56,6 @@ const BackButtonHandler = () => {
 
 const App = () => {
   useEffect(() => {
-    // One-time save of API key to secure storage
-    const saveApiKey = async () => {
-      try {
-        await SecureStoragePlugin.set({
-          key: 'api_secret',
-          value: 'mail-me-on-sainitij@gmail.com-with-sub-I_CRACK_YOUR_CCAPI'
-        });
-        console.log('API key saved to secure storage');
-      } catch (error) {
-        console.error('Error saving API key:', error);
-      }
-    };
-    
-    saveApiKey();
-  }, []); // Empty dependency array ensures this runs only once
-
-  useEffect(() => {
     // Show bottom banner ad on all screens
     adMobService.showBanner().catch(console.error);
     
@@ -87,11 +69,11 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <Sonner position="top-right" />
+        <Sonner />
         <BrowserRouter>
           <BackButtonHandler />
-          {/* Add padding-bottom to prevent content from being hidden by banner ad and safe area */}
-          <div className="pb-28" style={{ paddingBottom: 'max(7rem, calc(7rem + env(safe-area-inset-bottom)))' }}>
+          {/* Add padding-bottom to prevent content from being hidden by banner ad */}
+          <div className="pb-16">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/search" element={<Search />} />

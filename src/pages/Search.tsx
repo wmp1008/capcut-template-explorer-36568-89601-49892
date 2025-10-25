@@ -149,8 +149,9 @@ const Search = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="flex-1 h-12 bg-white/10 border-white/20 text-white placeholder:text-white/60"
               />
-              <Button type="submit" size="lg" variant="secondary" className="h-12 px-6">
-                Watch Ad to Search
+              <Button type="submit" size="lg" variant="secondary" className="h-12 relative">
+                <SearchIcon className="w-5 h-5" />
+                <Play className="w-3 h-3 absolute -top-1 -right-1 fill-current" />
               </Button>
             </div>
           </form>
