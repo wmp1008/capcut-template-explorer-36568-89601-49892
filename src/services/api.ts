@@ -1,3 +1,5 @@
+import { SecureStoragePlugin } from 'capacitor-secure-storage-plugin';
+
 const SEARCH_API_URL = 'https://cc-search.onrender.com/';
 const COLLECTION_API_BASE_URL = 'https://cc-list.onrender.com/get_collection_templates?id=';
 
@@ -67,9 +69,17 @@ export class ApiService {
       return cachedData;
     }
 
+    // Get API key from secure storage
+    const apiKeyResult = await SecureStoragePlugin.get({ key: 'api_secret' });
+    const apiKey = apiKeyResult.value;
+
     // Fetch from API if not in cache
     const url = `${COLLECTION_API_BASE_URL}${collectionId}&count=${count}`;
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        'X-Api-Key': apiKey
+      }
+    });
     
     if (!response.ok) {
       throw new Error('Failed to fetch collection templates');
@@ -103,10 +113,17 @@ export class ApiService {
       return cachedData;
     }
 
+    // Get API key from secure storage
+    const apiKeyResult = await SecureStoragePlugin.get({ key: 'api_secret' });
+    const apiKey = apiKeyResult.value;
+
     // Fetch from API if not in cache
     const url = `${SEARCH_API_URL}?search=${encodeURIComponent(query)}`;
     const response = await fetch(url, {
       method: 'GET',
+      headers: {
+        'X-Api-Key': apiKey
+      }
     });
 
     if (!response.ok) {
